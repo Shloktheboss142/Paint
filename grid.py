@@ -1,4 +1,8 @@
 from __future__ import annotations
+from layer_store import SetLayerStore,LayerStore,AdditiveLayerStore,SequenceLayerStore
+from data_structures.abstract_list import List
+from data_structures.referential_array import ArrayR
+
 class Grid:
     DRAW_STYLE_SET = "SET"
     DRAW_STYLE_ADD = "ADD"
@@ -24,7 +28,16 @@ class Grid:
 
         Should also intialise the brush size to the DEFAULT provided as a class variable.
         """
-        raise NotImplementedError()
+        self.draw_style = draw_style
+        self.x = x
+        self.y = y
+        self.brush_size = self.DEFAULT_BRUSH_SIZE
+
+        self.grid = ArrayR(self.x)
+        for i in range(self.x):
+            self.grid[i] = ArrayR(self.y)
+
+        self.grid[self.x][self.y] = SetLayerStore()
 
     def increase_brush_size(self):
         """
@@ -32,7 +45,9 @@ class Grid:
         if the brush size is already MAX_BRUSH,
         then do nothing.
         """
-        raise NotImplementedError()
+        
+        if self.brush_size < self.MAX_BRUSH:
+            self.brush_size += 1
 
     def decrease_brush_size(self):
         """
@@ -40,10 +55,16 @@ class Grid:
         if the brush size is already MIN_BRUSH,
         then do nothing.
         """
-        raise NotImplementedError()
+        
+        if self.brush_size > self.MIN_BRUSH:
+            self.brush_size -= 1
 
     def special(self):
         """
         Activate the special affect on all grid squares.
         """
         raise NotImplementedError()
+    
+    def __getitem__(self, index):
+            
+        return self.grid[index]

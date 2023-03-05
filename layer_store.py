@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from layer_util import Layer
+import layers 
 
 class LayerStore(ABC):
 
@@ -45,7 +46,49 @@ class SetLayerStore(LayerStore):
     - special: Invert the colour output.
     """
 
-    pass
+    def __init__(self) -> None:
+        self.layer = None
+        self.specials = False
+
+    def add(self, layer: Layer) -> bool:
+        """
+        Add a layer to the store.
+        Returns true if the LayerStore was actually changed.
+        """
+        if layer != self.layer:
+            self.layer = layer
+            return True
+        return False
+
+    def erase(self, layer: Layer) -> bool:
+        """
+        Complete the erase action with this layer
+        Returns true if the LayerStore was actually changed.
+        """
+        if layer != None:
+            self.layer = None
+            return True
+        return False
+
+    def special(self):
+        """
+        Special mode. Different for each store implementation.
+        """
+        self.specials = not self.specials
+        
+        
+    def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
+        """
+        Returns the colour this square should show, given the current layers.
+        """
+        if self.layer == None:
+            return start
+        
+        if self.specials == True:
+            start = self.layer.apply(start, timestamp, x, y)
+            return layers.invert.apply(start, timestamp, x, y)
+        else:
+            return self.layer.apply(start, timestamp, x, y)
 
 class AdditiveLayerStore(LayerStore):
     """
@@ -68,3 +111,13 @@ class SequenceLayerStore(LayerStore):
     """
 
     pass
+
+# if __name__ == "__main__":
+#     s = SetLayerStore()
+#     s.add(layers.lighten)
+#     print(s.get_color((100, 100, 100), 0, 0, 0))
+#     s.special()
+#     print(s.get_color((100, 100, 100), 0, 0, 0))
+#     s.special()
+#     print(s.get_color((100, 100, 100), 0, 0, 0))
+#     pass
