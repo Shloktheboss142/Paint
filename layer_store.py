@@ -120,4 +120,3 @@ class SequenceLayerStore(LayerStore):
 #     print(s.get_color((100, 100, 100), 0, 0, 0))
 #     s.special()
 #     print(s.get_color((100, 100, 100), 0, 0, 0))
-#     pass
