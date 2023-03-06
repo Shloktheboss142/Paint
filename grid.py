@@ -33,11 +33,11 @@ class Grid:
         self.y = y
         self.brush_size = self.DEFAULT_BRUSH_SIZE
 
-        self.grid = ArrayR(self.x)
+        self.grid = ArrayR(self.x+1)
         for i in range(self.x):
-            self.grid[i] = ArrayR(self.y)
-
-        self.grid[self.x][self.y] = SetLayerStore()
+            self.grid[i] = ArrayR(self.y+1)
+            for j in range(self.y):
+                self.grid[i][j] = SetLayerStore()
 
     def increase_brush_size(self):
         """
@@ -63,7 +63,10 @@ class Grid:
         """
         Activate the special affect on all grid squares.
         """
-        raise NotImplementedError()
+        for i in range(self.x):
+            self.grid[i] = ArrayR(self.y+1)
+            for j in range(self.y):
+                self.grid[i][j].special()
     
     def __getitem__(self, index):
             
