@@ -75,6 +75,7 @@ class SetLayerStore(LayerStore):
         Special mode. Different for each store implementation.
         """
         self.specials = not self.specials
+        # self.grid.bg_color = (255, 255, 255) if self.specials else (0, 0, 0)
         
         
     def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
