@@ -1,6 +1,5 @@
 from __future__ import annotations
-from layer_store import SetLayerStore,LayerStore,AdditiveLayerStore,SequenceLayerStore
-from data_structures.abstract_list import List
+from layer_store import SetLayerStore,AdditiveLayerStore,SequenceLayerStore
 from data_structures.referential_array import ArrayR
 
 class Grid:
@@ -39,6 +38,8 @@ class Grid:
             for j in range(self.y):
                 if self.draw_style == self.DRAW_STYLE_SET:
                     self.grid[i][j] = SetLayerStore()
+                    # self.grid[i][j].add(layers.)
+                    # self.grid[i][j].add(layers.bg(255,255,255))
                 elif self.draw_style == self.DRAW_STYLE_ADD:
                     self.grid[i][j] = AdditiveLayerStore()
                 elif self.draw_style == self.DRAW_STYLE_SEQUENCE:
@@ -100,10 +101,3 @@ class Grid:
         # for a in range(xmin, xmax):
         #     for b in range(ymin, ymax):
         #         self.grid[a][b].add(layer)
-
-            
-    
-
-# if __name__ == "__main__":
-#     grid = Grid(Grid.DRAW_STYLE_SET, 5, 5)
-#     print(grid[1][2])
