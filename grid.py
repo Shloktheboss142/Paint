@@ -1,6 +1,5 @@
 from __future__ import annotations
-from layer_store import SetLayerStore,LayerStore,AdditiveLayerStore,SequenceLayerStore
-from data_structures.abstract_list import List
+from layer_store import SetLayerStore,AdditiveLayerStore,SequenceLayerStore
 from data_structures.referential_array import ArrayR
 
 class Grid:
@@ -36,8 +35,15 @@ class Grid:
         self.grid = ArrayR(self.x)
         for i in range(self.x):
             self.grid[i] = ArrayR(self.y)
-
-        self.grid[self.x][self.y] = SetLayerStore()
+            for j in range(self.y):
+                if self.draw_style == self.DRAW_STYLE_SET:
+                    self.grid[i][j] = SetLayerStore()
+                    # self.grid[i][j].add(layers.)
+                    # self.grid[i][j].add(layers.bg(255,255,255))
+                elif self.draw_style == self.DRAW_STYLE_ADD:
+                    self.grid[i][j] = AdditiveLayerStore()
+                elif self.draw_style == self.DRAW_STYLE_SEQUENCE:
+                    self.grid[i][j] = SequenceLayerStore()
 
     def increase_brush_size(self):
         """
@@ -63,8 +69,35 @@ class Grid:
         """
         Activate the special affect on all grid squares.
         """
-        raise NotImplementedError()
+        # self.grid.special()
+        for i in range(self.x):
+            for j in range(self.y):
+                self.grid[i][j].special()
     
     def __getitem__(self, index):
             
         return self.grid[index]
+    
+    def paint(self, layer, x, y):
+
+        for a in range(x - self.brush_size, x + self.brush_size + 1):
+            for b in range(y - self.brush_size, y + self.brush_size + 1):
+                if abs(x - a) + abs(y - b) <= self.brush_size and a >= 0 and a < self.x and b >= 0 and b < self.y:
+                    self.grid[a][b].add(layer)
+
+        # a = x - self.brush_size
+        # while a <= x + self.brush_size:
+        #     b = y - self.brush_size
+        #     while y <= y + self.brush_size:
+        #         if abs(x - b) + abs(y - b) <= self.brush_size:
+        #             self.grid[a][b].add(layer)
+        #         y += 1
+        #     a += 1
+
+        # xmin = max(x - self.brush_size, 0)
+        # xmax = min(x + self.brush_size + 1, self.x)
+        # ymin = max(y - self.brush_size, 0)
+        # ymax = min(y + self.brush_size + 1, self.y)
+        # for a in range(xmin, xmax):
+        #     for b in range(ymin, ymax):
+        #         self.grid[a][b].add(layer)
