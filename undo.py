@@ -11,7 +11,7 @@ class UndoTracker:
         If your collection is already full,
         feel free to exit early and not add the action.
         """
-        raise NotImplementedError()
+        pass
 
     def undo(self, grid: Grid) -> PaintAction|None:
         """
@@ -20,7 +20,7 @@ class UndoTracker:
 
         :return: The action that was undone, or None.
         """
-        raise NotImplementedError()
+        pass
 
     def redo(self, grid: Grid) -> PaintAction|None:
         """
@@ -29,4 +29,4 @@ class UndoTracker:
 
         :return: The action that was redone, or None.
         """
-        raise NotImplementedError()
+        pass
