@@ -27,6 +27,7 @@ class Grid:
 
         Should also intialise the brush size to the DEFAULT provided as a class variable.
         """
+        
         self.draw_style = draw_style
         self.x = x
         self.y = y
@@ -38,12 +39,10 @@ class Grid:
             for j in range(self.y):
                 if self.draw_style == self.DRAW_STYLE_SET:
                     self.grid[i][j] = SetLayerStore()
-                    # self.grid[i][j].add(layers.)
-                    # self.grid[i][j].add(layers.bg(255,255,255))
                 elif self.draw_style == self.DRAW_STYLE_ADD:
-                    self.grid[i][j] = AdditiveLayerStore()
+                    self.grid[i][j] = SetLayerStore()
                 elif self.draw_style == self.DRAW_STYLE_SEQUENCE:
-                    self.grid[i][j] = SequenceLayerStore()
+                    self.grid[i][j] = SetLayerStore()
 
     def increase_brush_size(self):
         """
@@ -61,7 +60,7 @@ class Grid:
         if the brush size is already MIN_BRUSH,
         then do nothing.
         """
-        
+
         if self.brush_size > self.MIN_BRUSH:
             self.brush_size -= 1
 
@@ -69,7 +68,7 @@ class Grid:
         """
         Activate the special affect on all grid squares.
         """
-        # self.grid.special()
+
         for i in range(self.x):
             for j in range(self.y):
                 self.grid[i][j].special()
@@ -84,20 +83,3 @@ class Grid:
             for b in range(y - self.brush_size, y + self.brush_size + 1):
                 if abs(x - a) + abs(y - b) <= self.brush_size and a >= 0 and a < self.x and b >= 0 and b < self.y:
                     self.grid[a][b].add(layer)
-
-        # a = x - self.brush_size
-        # while a <= x + self.brush_size:
-        #     b = y - self.brush_size
-        #     while y <= y + self.brush_size:
-        #         if abs(x - b) + abs(y - b) <= self.brush_size:
-        #             self.grid[a][b].add(layer)
-        #         y += 1
-        #     a += 1
-
-        # xmin = max(x - self.brush_size, 0)
-        # xmax = min(x + self.brush_size + 1, self.x)
-        # ymin = max(y - self.brush_size, 0)
-        # ymax = min(y + self.brush_size + 1, self.y)
-        # for a in range(xmin, xmax):
-        #     for b in range(ymin, ymax):
-        #         self.grid[a][b].add(layer)

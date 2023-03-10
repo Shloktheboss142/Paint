@@ -302,7 +302,7 @@ class MyWindow(arcade.Window):
         px: x position of the brush.
         py: y position of the brush.
         """
-        self.grid.paint(layer, px,py)
+        self.grid.paint(layer, px, py)
 
     def on_undo(self):
         """Called when an undo is requested."""
@@ -325,7 +325,7 @@ class MyWindow(arcade.Window):
         Called when the next step of the replay is requested.
         Returns whether the replay is finished.
         """
-        return True
+        pass
 
     def on_increase_brush_size(self):
         """Called when an increase to the brush size is requested."""
