@@ -130,7 +130,7 @@ class AdditiveLayerStore(LayerStore):
         Returns true if the LayerStore was actually changed.
         """
 
-        temp_stack = ArrayStack(len(get_layers()) * 100)
+        temp_stack = ArrayStack(len(get_layers()) * 100) 
         
         while self.stack.is_empty() == False:
             temp = self.stack.pop()
