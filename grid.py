@@ -40,9 +40,9 @@ class Grid:
                 if self.draw_style == self.DRAW_STYLE_SET:
                     self.grid[i][j] = SetLayerStore()
                 elif self.draw_style == self.DRAW_STYLE_ADD:
-                    self.grid[i][j] = SetLayerStore()
+                    self.grid[i][j] = AdditiveLayerStore()
                 elif self.draw_style == self.DRAW_STYLE_SEQUENCE:
-                    self.grid[i][j] = SetLayerStore()
+                    self.grid[i][j] = SequenceLayerStore()
 
     def increase_brush_size(self):
         """
