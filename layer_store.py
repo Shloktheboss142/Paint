@@ -5,7 +5,7 @@ from layer_util import get_layers
 import layers
 from data_structures.stack_adt import ArrayStack
 from data_structures.abstract_list import List
-from data_structures.array_sorted_list import ArraySortedList
+from data_structures.array_sorted_list import ArraySortedList, ListItem
 
 class LayerStore(ABC):
 
@@ -180,19 +180,10 @@ class AdditiveLayerStore(LayerStore):
             self.stack.push(temp)
 
         return start
-
+    
 class SequenceLayerStore(LayerStore):
-    """
-    Sequential layer store. Each layer type is either applied / not applied, and is applied in order of index.
-    - add: Ensure this layer type is applied.
-    - erase: Ensure this layer type is not applied.
-    - special:
-        Of all currently applied layers, remove the one with median `name`.
-        In the event of two layers being the median names, pick the lexicographically smaller one.
-    """
 
     def __init__(self) -> None:
-
         valid_layer_count = 0
 
         for x in get_layers():
@@ -202,45 +193,42 @@ class SequenceLayerStore(LayerStore):
         self.sequence = ArraySortedList(valid_layer_count)
         for x in get_layers():
             if x != None:
-                x.key = x.index
-                x.applied_status = False
-                self.sequence.add(x)
-
+                self.sequence.add(ListItem(False, x.index))
 
     def add(self, layer: Layer) -> bool:
         """
         Add a layer to the store.
         Returns true if the LayerStore was actually changed.
         """
-
-        if self.sequence[layer.key].applied_status == False:
-            self.sequence[layer.key].applied_status = True
-            return True
-        else:
-            return False
+        self.sequence.delete_at_index(layer.index)
+        self.sequence.add(ListItem(True, layer.index))
 
     def erase(self, layer: Layer) -> bool:
         """
         Complete the erase action with this layer
         Returns true if the LayerStore was actually changed.
         """
+        self.sequence.delete_at_index(layer.index)
+        self.sequence.add(ListItem(False, layer.index))
 
-        if self.sequence[layer.key].applied_status == True:
-            self.sequence[layer.key].applied_status = False
-            return True
-        else:
-            return False
+    def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
+        """
+        Returns the colour this square should show, given the current layers.
+        """
+        for x in range(self.sequence.length):
+            if self.sequence[x].value == True:
+                start = get_layers()[self.sequence[x].key].apply(start, timestamp, x, y)
+        return start
 
     def special(self):
         """
         Special mode. Different for each store implementation.
         """
-
         temp_list = ArraySortedList(len(get_layers()))
-        for x in self.sequence:
-            if x.applied_status == True:
-                x.key = x.name
-                temp_list.add(x)
+
+        for x in range(self.sequence.length):
+            if self.sequence[x].value == True:
+                temp_list.add(ListItem(get_layers()[self.sequence[x].key], get_layers()[self.sequence[x].key].name))
 
         if len(temp_list) %2 == 0:
             temp_list.delete_at_index(len(temp_list)-1)
@@ -249,18 +237,15 @@ class SequenceLayerStore(LayerStore):
             temp_list.delete_at_index(0)
             temp_list.delete_at_index(len(temp_list)-1)
         
-        temp_list[0].applied_status = False
+        layer = temp_list[0].value
 
-        for x in self.sequence:
-            x.key = x.index
-        
-    def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
-        """
-        Returns the colour this square should show, given the current layers.
-        """
+        self.erase(layer)
 
-        for a in self.sequence:
-            if a.applied_status == True:
-                start = a.apply(start, timestamp, x, y)
-        return start
-
+if __name__=='__main__':
+    s = SequenceLayerStore()
+    s.add(layers.black)
+    s.add(layers.lighten)
+    print(s.get_color((100, 100, 100), 0, 20, 40), (40, 40, 40))
+    s.erase(layers.lighten)
+    s.add(layers.rainbow)
+    print(s.get_color((20, 20, 20), 7, 0, 0), (0, 0, 0))
