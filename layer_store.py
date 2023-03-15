@@ -4,8 +4,8 @@ from layer_util import Layer
 from layer_util import get_layers
 import layers
 from data_structures.stack_adt import ArrayStack
-from data_structures.abstract_list import List
 from data_structures.array_sorted_list import ArraySortedList, ListItem
+from data_structures.queue_adt import CircularQueue
 
 class LayerStore(ABC):
 
@@ -110,7 +110,7 @@ class AdditiveLayerStore(LayerStore):
 
     def __init__(self) -> None:
 
-        self.stack = ArrayStack(len(get_layers()) * 100)
+        self.queue = CircularQueue(len(get_layers()) * 100)
 
     def add(self, layer: Layer) -> bool:
         """
@@ -118,8 +118,8 @@ class AdditiveLayerStore(LayerStore):
         Returns true if the LayerStore was actually changed.
         """
 
-        if self.stack.is_full() == False:
-            self.stack.push(layer)
+        if self.queue.is_full() == False:
+            self.queue.append(layer)
             return True
         else:
             return False
@@ -130,17 +130,10 @@ class AdditiveLayerStore(LayerStore):
         Returns true if the LayerStore was actually changed.
         """
 
-        temp_stack = ArrayStack(len(get_layers()) * 100) 
-        
-        while self.stack.is_empty() == False:
-            temp = self.stack.pop()
-            temp_stack.push(temp)
-
-        temp_stack.pop()
-
-        while temp_stack.is_empty() == False:
-            temp = temp_stack.pop()
-            self.stack.push(temp)
+        if self.queue.is_empty() == False:
+            self.queue.serve()
+            return True
+        return False
 
 
     def special(self):
@@ -148,36 +141,25 @@ class AdditiveLayerStore(LayerStore):
         Special mode. Different for each store implementation.
         """
 
-        Temp_1 = ArrayStack(len(get_layers()) * 100)
-        Temp_2 = ArrayStack(len(get_layers()) * 100)
+        temp_stack = ArrayStack(len(get_layers()) * 100)
 
-        while self.stack.is_empty() == False:
-            Temp_1.push(self.stack.pop())
+        for _ in range(self.queue.length):
+            temp_stack.push(self.queue.serve())
 
-        while Temp_1.is_empty() == False:
-            Temp_2.push(Temp_1.pop())
+        for _ in range(temp_stack.length):
+            self.queue.append(temp_stack.pop())
 
-        while Temp_2.is_empty() == False:
-            self.stack.push(Temp_2.pop())
+
         
     def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
         """
         Returns the colour this square should show, given the current layers.
         """
 
-        if self.stack.is_empty() == True:
-            return start
-
-        temp_stack = ArrayStack(len(get_layers()) * 100)
-        
-        while self.stack.is_empty() == False:
-            temp = self.stack.pop()
-            temp_stack.push(temp)
-
-        while temp_stack.is_empty() == False:
-            temp = temp_stack.pop()
-            start = temp.apply(start, timestamp, x, y)
-            self.stack.push(temp)
+        for _ in range(self.queue.length):
+            layer_to_apply = self.queue.serve()
+            start = layer_to_apply.apply(start, timestamp, x, y)
+            self.queue.append(layer_to_apply)
 
         return start
     
@@ -224,11 +206,18 @@ class SequenceLayerStore(LayerStore):
         """
         Special mode. Different for each store implementation.
         """
+
         temp_list = ArraySortedList(len(get_layers()))
 
         for x in range(self.sequence.length):
             if self.sequence[x].value == True:
                 temp_list.add(ListItem(get_layers()[self.sequence[x].key], get_layers()[self.sequence[x].key].name))
+
+        if temp_list.length == 0:
+            return None
+        elif temp_list.length == 1:
+            self.sequence.erase(temp_list[0].value)
+            return None
 
         if len(temp_list) %2 == 0:
             temp_list.delete_at_index(len(temp_list)-1)
@@ -242,10 +231,4 @@ class SequenceLayerStore(LayerStore):
         self.erase(layer)
 
 if __name__=='__main__':
-    s = SequenceLayerStore()
-    s.add(layers.black)
-    s.add(layers.lighten)
-    print(s.get_color((100, 100, 100), 0, 20, 40), (40, 40, 40))
-    s.erase(layers.lighten)
-    s.add(layers.rainbow)
-    print(s.get_color((20, 20, 20), 7, 0, 0), (0, 0, 0))
+    pass
