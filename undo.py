@@ -4,6 +4,9 @@ from grid import Grid
 
 class UndoTracker:
 
+    def __init__(self):
+        pass
+
     def add_action(self, action: PaintAction) -> None:
         """
         Adds an action to the undo tracker.

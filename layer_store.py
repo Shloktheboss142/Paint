@@ -216,7 +216,7 @@ class SequenceLayerStore(LayerStore):
         if temp_list.length == 0:
             return None
         elif temp_list.length == 1:
-            self.sequence.erase(temp_list[0].value)
+            self.sequence.remove(temp_list[0].value)
             return None
 
         if len(temp_list) %2 == 0:
