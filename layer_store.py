@@ -182,16 +182,22 @@ class SequenceLayerStore(LayerStore):
         Add a layer to the store.
         Returns true if the LayerStore was actually changed.
         """
-        self.sequence.delete_at_index(layer.index)
-        self.sequence.add(ListItem(True, layer.index))
+        if self.sequence[layer.index].value == False:
+            self.sequence.delete_at_index(layer.index)
+            self.sequence.add(ListItem(True, layer.index))
+            return True
+        return False
 
     def erase(self, layer: Layer) -> bool:
         """
         Complete the erase action with this layer
         Returns true if the LayerStore was actually changed.
         """
-        self.sequence.delete_at_index(layer.index)
-        self.sequence.add(ListItem(False, layer.index))
+        if self.sequence[layer.index].value == True:
+            self.sequence.delete_at_index(layer.index)
+            self.sequence.add(ListItem(False, layer.index))
+            return True
+        return False
 
     def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
         """
@@ -216,19 +222,14 @@ class SequenceLayerStore(LayerStore):
         if temp_list.length == 0:
             return None
         elif temp_list.length == 1:
-            self.sequence.remove(temp_list[0].value)
-            return None
+            # self.sequence.remove(temp_list[0].value)
+            self.erase(temp_list[0].value)
+            return 
 
         if len(temp_list) %2 == 0:
             temp_list.delete_at_index(len(temp_list)-1)
 
-        while len(temp_list) != 1:
-            temp_list.delete_at_index(0)
-            temp_list.delete_at_index(len(temp_list)-1)
-        
-        layer = temp_list[0].value
-
-        self.erase(layer)
+        self.erase(temp_list[len(temp_list) // 2].value)
 
 if __name__=='__main__':
     pass
