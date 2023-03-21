@@ -44,7 +44,8 @@ class ReplayTracker:
                 paintAction.action_sequence.pop().undo_apply(grid)
                 return False
             else:
-                paintAction.redo_apply(grid)
+                if isinstance(paintAction, PaintAction):
+                    paintAction.redo_apply(grid)
                 return False
         else:
             return True

@@ -78,8 +78,11 @@ class Grid:
         return self.grid[index]
     
     def paint(self, layer, x, y):
-
+        from action import PaintAction, PaintStep
+        paint_action = PaintAction()
         for a in range(x - self.brush_size, x + self.brush_size + 1):
             for b in range(y - self.brush_size, y + self.brush_size + 1):
                 if abs(x - a) + abs(y - b) <= self.brush_size and a >= 0 and a < self.x and b >= 0 and b < self.y:
-                    self.grid[a][b].add(layer)
+                    if self.grid[a][b].add(layer) == True:
+                        paint_action.add_step(PaintStep((a, b), layer))
+        return paint_action

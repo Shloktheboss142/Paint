@@ -61,7 +61,7 @@ class SetLayerStore(LayerStore):
         Returns true if the LayerStore was actually changed.
         """
 
-        if layer != self.layer:
+        if self.layer != layer or self.layer == None:
             self.layer = layer
             return True
         return False

@@ -294,7 +294,7 @@ class MyWindow(arcade.Window):
 
     def on_reset(self):
         """Called when a window reset is requested."""
-        pass
+        self.on_init()
 
     def on_paint(self, layer: Layer, px, py):
         """
@@ -305,15 +305,18 @@ class MyWindow(arcade.Window):
         px: x position of the brush.
         py: y position of the brush.
         """
-        self.grid.paint(layer, px, py)
+        # self.grid.paint(layer, px, py)
+        paintttt = self.grid.paint(layer, px, py)
+        self.undo_tracker.add_action(paintttt)
+        self.replay_tracker.add_action(paintttt)
 
     def on_undo(self):
         """Called when an undo is requested."""
-        pass
+        self.replay_tracker.add_action(self.undo_tracker.undo(self.grid), True)
 
     def on_redo(self):
         """Called when a redo is requested."""
-        pass
+        self.replay_tracker.add_action(self.undo_tracker.redo(self.grid))
 
     def on_special(self):
         """Called when the special action is requested."""
@@ -321,14 +324,14 @@ class MyWindow(arcade.Window):
 
     def on_replay_start(self):
         """Called when the replay starting is requested."""
-        pass
+        self.replay_tracker.start_replay()
 
     def on_replay_next_step(self) -> bool:
         """
         Called when the next step of the replay is requested.
         Returns whether the replay is finished.
         """
-        pass
+        return self.replay_tracker.play_next_action(self.grid)
 
     def on_increase_brush_size(self):
         """Called when an increase to the brush size is requested."""
