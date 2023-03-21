@@ -2,7 +2,6 @@ from __future__ import annotations
 from action import PaintAction
 from grid import Grid
 from data_structures.queue_adt import CircularQueue
-# from data_structures.stack_adt import ArrayStack
 from undo import UndoTracker
 
 class ReplayTracker:
