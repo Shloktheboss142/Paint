@@ -52,8 +52,8 @@ class SetLayerStore(LayerStore):
 
     def __init__(self) -> None:
 
-        self.layer = None
-        self.special_mode = False
+        self.active_layer = None
+        self.special_mode_status = False
 
     def add(self, layer: Layer) -> bool:
         """
@@ -61,10 +61,26 @@ class SetLayerStore(LayerStore):
         Returns true if the LayerStore was actually changed.
         """
 
-        if self.layer != layer or self.layer == None:
-            self.layer = layer
+        if self.active_layer != layer or self.active_layer == None:
+            self.active_layer = layer
             return True
         return False
+    
+    def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
+        """
+        Returns the colour this square should show, given the current layers.
+        """
+
+        if self.active_layer == None and self.special_mode_status == False:
+            return start
+        elif self.active_layer == None and self.special_mode_status == True:
+            return layers.black.apply(start, timestamp, x, y)
+        
+        if self.special_mode_status == True:
+            start = self.active_layer.apply(start, timestamp, x, y)
+            return layers.invert.apply(start, timestamp, x, y)
+        else:
+            return self.active_layer.apply(start, timestamp, x, y)
 
     def erase(self, layer: Layer) -> bool:
         """
@@ -72,8 +88,8 @@ class SetLayerStore(LayerStore):
         Returns true if the LayerStore was actually changed.
         """
 
-        if layer != None:
-            self.layer = None
+        if self.active_layer != None:
+            self.active_layer = None
             return True
         return False
 
@@ -82,23 +98,7 @@ class SetLayerStore(LayerStore):
         Special mode. Different for each store implementation.
         """
 
-        self.special_mode = not self.special_mode
-        
-    def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
-        """
-        Returns the colour this square should show, given the current layers.
-        """
-
-        if self.layer == None and self.special_mode == False:
-            return start
-        elif self.layer == None and self.special_mode == True:
-            return layers.black.apply(start, timestamp, x, y)
-        
-        if self.special_mode == True:
-            start = self.layer.apply(start, timestamp, x, y)
-            return layers.invert.apply(start, timestamp, x, y)
-        else:
-            return self.layer.apply(start, timestamp, x, y)
+        self.special_mode_status = not self.special_mode_status
 
 class AdditiveLayerStore(LayerStore):
     """
@@ -110,7 +110,7 @@ class AdditiveLayerStore(LayerStore):
 
     def __init__(self) -> None:
 
-        self.queue = CircularQueue(len(get_layers()) * 100)
+        self.layer_sequence = CircularQueue(len(get_layers()) * 100)
 
     def add(self, layer: Layer) -> bool:
         """
@@ -118,11 +118,23 @@ class AdditiveLayerStore(LayerStore):
         Returns true if the LayerStore was actually changed.
         """
 
-        if self.queue.is_full() == False:
-            self.queue.append(layer)
+        if self.layer_sequence.is_full() == False:
+            self.layer_sequence.append(layer)
             return True
         else:
             return False
+        
+    def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
+        """
+        Returns the colour this square should show, given the current layers.
+        """
+
+        for _ in range(self.layer_sequence.length):
+            layer_to_apply = self.layer_sequence.serve()
+            start = layer_to_apply.apply(start, timestamp, x, y)
+            self.layer_sequence.append(layer_to_apply)
+
+        return start
         
     def erase(self, layer: Layer) -> bool:
         """
@@ -130,83 +142,79 @@ class AdditiveLayerStore(LayerStore):
         Returns true if the LayerStore was actually changed.
         """
 
-        if self.queue.is_empty() == False:
-            self.queue.serve()
+        if self.layer_sequence.is_empty() == False:
+            self.layer_sequence.serve()
             return True
         return False
-
 
     def special(self):
         """
         Special mode. Different for each store implementation.
         """
 
-        temp_stack = ArrayStack(len(get_layers()) * 100)
+        temp_layer_stack = ArrayStack(len(get_layers()) * 100)
 
-        for _ in range(self.queue.length):
-            temp_stack.push(self.queue.serve())
+        for _ in range(self.layer_sequence.length):
+            temp_layer_stack.push(self.layer_sequence.serve())
 
-        for _ in range(temp_stack.length):
-            self.queue.append(temp_stack.pop())
+        for _ in range(temp_layer_stack.length):
+            self.layer_sequence.append(temp_layer_stack.pop())
+    
+class SequenceLayerStore(LayerStore):
+    """
+    Sequence layer store. Layers are either 'enabled' or 'disabled'.
+    - add: 'Enables' the layer.
+    - erase: 'Disables' the layer.
+    - special: Order all the active layers lexiographically and 'disable' the centre one.
+    """
 
+    def __init__(self) -> None:
 
+        valid_layer_count = 0
+
+        for number_of_layers in get_layers():
+            if number_of_layers != None:
+                valid_layer_count += 1
+
+        self.layer_list = ArraySortedList(valid_layer_count)
         
+        for layer in get_layers():
+            if layer != None:
+                self.layer_list.add(ListItem(False, layer.index))
+
+    def add(self, layer: Layer) -> bool:
+        """
+        Add a layer to the store.
+        Returns true if the LayerS\tore was actually changed.
+        """
+        
+        if self.layer_list[layer.index].value == False:
+            self.layer_list.delete_at_index(layer.index)
+            self.layer_list.add(ListItem(True, layer.index))
+            return True
+        return False
+    
     def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
         """
         Returns the colour this square should show, given the current layers.
         """
 
-        for _ in range(self.queue.length):
-            layer_to_apply = self.queue.serve()
-            start = layer_to_apply.apply(start, timestamp, x, y)
-            self.queue.append(layer_to_apply)
-
+        for index in range(self.layer_list.length):
+            if self.layer_list[index].value == True:
+                start = get_layers()[self.layer_list[index].key].apply(start, timestamp, x, y)
         return start
-    
-class SequenceLayerStore(LayerStore):
-
-    def __init__(self) -> None:
-        valid_layer_count = 0
-
-        for x in get_layers():
-            if x != None:
-                valid_layer_count += 1
-
-        self.sequence = ArraySortedList(valid_layer_count)
-        for x in get_layers():
-            if x != None:
-                self.sequence.add(ListItem(False, x.index))
-
-    def add(self, layer: Layer) -> bool:
-        """
-        Add a layer to the store.
-        Returns true if the LayerStore was actually changed.
-        """
-        if self.sequence[layer.index].value == False:
-            self.sequence.delete_at_index(layer.index)
-            self.sequence.add(ListItem(True, layer.index))
-            return True
-        return False
 
     def erase(self, layer: Layer) -> bool:
         """
         Complete the erase action with this layer
         Returns true if the LayerStore was actually changed.
         """
-        if self.sequence[layer.index].value == True:
-            self.sequence.delete_at_index(layer.index)
-            self.sequence.add(ListItem(False, layer.index))
+
+        if self.layer_list[layer.index].value == True:
+            self.layer_list.delete_at_index(layer.index)
+            self.layer_list.add(ListItem(False, layer.index))
             return True
         return False
-
-    def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
-        """
-        Returns the colour this square should show, given the current layers.
-        """
-        for x in range(self.sequence.length):
-            if self.sequence[x].value == True:
-                start = get_layers()[self.sequence[x].key].apply(start, timestamp, x, y)
-        return start
 
     def special(self):
         """
@@ -215,21 +223,19 @@ class SequenceLayerStore(LayerStore):
 
         temp_list = ArraySortedList(len(get_layers()))
 
-        for x in range(self.sequence.length):
-            if self.sequence[x].value == True:
-                temp_list.add(ListItem(get_layers()[self.sequence[x].key], get_layers()[self.sequence[x].key].name))
+        for index in range(self.layer_list.length):
+            if self.layer_list[index].value == True:
+                item_key = get_layers()[self.layer_list[index].key]
+                item_name = get_layers()[self.layer_list[index].key].name
+                temp_list.add(ListItem(item_key, item_name))
 
         if temp_list.length == 0:
             return None
         elif temp_list.length == 1:
-            # self.sequence.remove(temp_list[0].value)
             self.erase(temp_list[0].value)
-            return 
+            return None
 
-        if len(temp_list) %2 == 0:
-            temp_list.delete_at_index(len(temp_list)-1)
+        if temp_list.length % 2 == 0:
+            temp_list.delete_at_index(temp_list.length - 1)
 
-        self.erase(temp_list[len(temp_list) // 2].value)
-
-if __name__=='__main__':
-    pass
+        self.erase(temp_list[temp_list.length // 2].value)

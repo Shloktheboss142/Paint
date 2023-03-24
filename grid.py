@@ -1,6 +1,8 @@
 from __future__ import annotations
 from layer_store import SetLayerStore,AdditiveLayerStore,SequenceLayerStore
 from data_structures.referential_array import ArrayR
+import layers
+
 
 class Grid:
     DRAW_STYLE_SET = "SET"
@@ -27,22 +29,22 @@ class Grid:
 
         Should also intialise the brush size to the DEFAULT provided as a class variable.
         """
-        
+        self.special_status = False
         self.draw_style = draw_style
         self.x = x
         self.y = y
         self.brush_size = self.DEFAULT_BRUSH_SIZE
 
         self.grid = ArrayR(self.x)
-        for i in range(self.x):
-            self.grid[i] = ArrayR(self.y)
-            for j in range(self.y):
+        for length in range(self.x):
+            self.grid[length] = ArrayR(self.y)
+            for width in range(self.y):
                 if self.draw_style == self.DRAW_STYLE_SET:
-                    self.grid[i][j] = SetLayerStore()
+                    self.grid[length][width] = SetLayerStore()
                 elif self.draw_style == self.DRAW_STYLE_ADD:
-                    self.grid[i][j] = AdditiveLayerStore()
+                    self.grid[length][width] = AdditiveLayerStore()
                 elif self.draw_style == self.DRAW_STYLE_SEQUENCE:
-                    self.grid[i][j] = SequenceLayerStore()
+                    self.grid[length][width] = SequenceLayerStore()
 
     def increase_brush_size(self):
         """
@@ -50,7 +52,6 @@ class Grid:
         if the brush size is already MAX_BRUSH,
         then do nothing.
         """
-        
         if self.brush_size < self.MAX_BRUSH:
             self.brush_size += 1
 
@@ -60,7 +61,6 @@ class Grid:
         if the brush size is already MIN_BRUSH,
         then do nothing.
         """
-
         if self.brush_size > self.MIN_BRUSH:
             self.brush_size -= 1
 
@@ -68,21 +68,29 @@ class Grid:
         """
         Activate the special affect on all grid squares.
         """
-
-        for i in range(self.x):
-            for j in range(self.y):
-                self.grid[i][j].special()
+        self.special_status = not self.special_status
+        for length in range(self.x):
+            for width in range(self.y):
+                self.grid[length][width].special()
     
-    def __getitem__(self, index):
-            
+    def __getitem__(self, index): 
         return self.grid[index]
     
     def paint(self, layer, x, y):
-        from action import PaintAction, PaintStep
-        paint_action = PaintAction()
-        for a in range(x - self.brush_size, x + self.brush_size + 1):
-            for b in range(y - self.brush_size, y + self.brush_size + 1):
-                if abs(x - a) + abs(y - b) <= self.brush_size and a >= 0 and a < self.x and b >= 0 and b < self.y:
-                    if self.grid[a][b].add(layer) == True:
-                        paint_action.add_step(PaintStep((a, b), layer))
+        """
+        Paint the grid square at (x, y) with the given layer.
+        Returns a PaintAction object.
+        O Complexity = O(brush_size^2)
+        """
+        from action import PaintStep, PaintAction
+        paint_action = PaintAction(is_special=self.special_status)
+        for length in range(x - self.brush_size, x + self.brush_size + 1):
+            for width in range(y - self.brush_size, y + self.brush_size + 1):
+                if 0 <= length < self.x and 0 <= width < self.y and (abs(x - length) + abs(y - width)) <= self.brush_size:
+                    if self.grid[length][width].add(layer) == True:
+                        paint_action.add_step(PaintStep((length, width), layer))
         return paint_action
+    
+if __name__ == "__main__":
+    from doctest import testmod
+    testmod()
