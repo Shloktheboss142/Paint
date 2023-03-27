@@ -7,6 +7,8 @@ from layers import lighten
 from undo import UndoTracker
 from replay import ReplayTracker
 
+__author__ = "Shlok Arjun Marathe"
+
 class MyWindow(arcade.Window):
     """ Painter Window """
 
@@ -321,7 +323,9 @@ class MyWindow(arcade.Window):
 
     def on_special(self):
         """Called when the special action is requested."""
-        self.grid.special()
+        special = self.grid.special()
+        self.undo_tracker.add_action(special)
+        self.replay_tracker.add_action(special)
 
     def on_replay_start(self):
         """Called when the replay starting is requested."""
