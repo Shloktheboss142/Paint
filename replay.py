@@ -24,10 +24,10 @@ class ReplayTracker:
         `is_undo` specifies whether the action was an undo action or not.
         Special, Redo, and Draw all have this is False.
         """
-        if is_undo:
-            undo = UndoTracker()
-            undo.add_action(action)
-            self.replay_sequence.append(undo)
+        if is_undo == True:
+            undo_tracker = UndoTracker()
+            undo_tracker.add_action(action)
+            self.replay_sequence.append(undo_tracker)
         else:
             self.replay_sequence.append(action)
 
@@ -38,14 +38,15 @@ class ReplayTracker:
             - If there were no more actions to play, and so nothing happened, return True.
             - Otherwise, return False.
         """
-        if self.replay_sequence.length > 0:
-            paintAction = self.replay_sequence.serve()
-            if isinstance(paintAction, UndoTracker):
-                paintAction.action_sequence.pop().undo_apply(grid)
+        if self.replay_sequence.is_empty() == False:
+            replay_action = self.replay_sequence.serve()
+            if isinstance(replay_action, UndoTracker) == True:
+                replay_action.action_sequence.pop().undo_apply(grid)
                 return False
             else:
-                paintAction.redo_apply(grid)
-                return False
+                if isinstance(replay_action, PaintAction) == True:
+                    replay_action.redo_apply(grid)
+                    return False
         else:
             return True
 

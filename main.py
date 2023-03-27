@@ -7,6 +7,8 @@ from layers import lighten
 from undo import UndoTracker
 from replay import ReplayTracker
 
+__author__ = "Shlok Arjun Marathe"
+
 class MyWindow(arcade.Window):
     """ Painter Window """
 
@@ -294,7 +296,7 @@ class MyWindow(arcade.Window):
 
     def on_reset(self):
         """Called when a window reset is requested."""
-        pass
+        self.on_init()
 
     def on_paint(self, layer: Layer, px, py):
         """
@@ -305,30 +307,36 @@ class MyWindow(arcade.Window):
         px: x position of the brush.
         py: y position of the brush.
         """
-        self.grid.paint(layer, px, py)
+        paint_action = self.grid.paint(layer, px, py)
+        self.undo_tracker.add_action(paint_action)
+        self.replay_tracker.add_action(paint_action)
 
     def on_undo(self):
         """Called when an undo is requested."""
-        pass
+        action_to_undo = self.undo_tracker.undo(self.grid)
+        self.replay_tracker.add_action(action_to_undo, True)
 
     def on_redo(self):
         """Called when a redo is requested."""
-        pass
+        action_to_redo = self.undo_tracker.redo(self.grid)
+        self.replay_tracker.add_action(action_to_redo)
 
     def on_special(self):
         """Called when the special action is requested."""
-        self.grid.special()
+        special = self.grid.special()
+        self.undo_tracker.add_action(special)
+        self.replay_tracker.add_action(special)
 
     def on_replay_start(self):
         """Called when the replay starting is requested."""
-        pass
+        self.replay_tracker.start_replay()
 
     def on_replay_next_step(self) -> bool:
         """
         Called when the next step of the replay is requested.
         Returns whether the replay is finished.
         """
-        pass
+        return self.replay_tracker.play_next_action(self.grid)
 
     def on_increase_brush_size(self):
         """Called when an increase to the brush size is requested."""

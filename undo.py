@@ -7,8 +7,7 @@ class UndoTracker:
 
     def __init__(self):
         self.action_sequence = ArrayStack(10000)
-        self.unodSequence = ArrayStack(10000)
-        # self.recently_undone = None
+        self.undo_sequence = ArrayStack(10000)
 
     def add_action(self, action: PaintAction) -> None:
         """
@@ -27,12 +26,13 @@ class UndoTracker:
 
         :return: The action that was undone, or None.
         """
-        if self.action_sequence.is_empty():
+        if self.action_sequence.is_empty() == True:
             return None
-        action_to_undo = self.action_sequence.pop()
-        self.unodSequence.push(action_to_undo)
-        action_to_undo.undo_apply(grid)
-        return action_to_undo
+        else:
+            operation = self.action_sequence.pop()
+            self.undo_sequence.push(operation)
+            operation.undo_apply(grid)
+            return operation
 
     def redo(self, grid: Grid) -> PaintAction|None:
         """
@@ -41,9 +41,10 @@ class UndoTracker:
 
         :return: The action that was redone, or None.
         """
-        if self.action_sequence.is_empty():
+        if self.undo_sequence.is_empty() == True:
             return None
-        action_to_redo = self.unodSequence.pop()
-        self.action_sequence.push(action_to_redo)
-        action_to_redo.redo_apply(grid)
-        return action_to_redo
+        else:
+            operation = self.undo_sequence.pop()
+            self.action_sequence.push(operation)
+            operation.redo_apply(grid)
+            return operation
