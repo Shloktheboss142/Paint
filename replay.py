@@ -18,6 +18,8 @@ class ReplayTracker:
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1), Since the length of the CircularQueue to be initialised is constant
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when the queue is initialised since there is no other option
         """
         self.replay_sequence = CircularQueue(10000)                                 # O(1), Since the length of the CircularQueue to be initialised is constant
 
@@ -45,6 +47,8 @@ class ReplayTracker:
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+        
+        Both best and worst happen when either the queue is full or not full and hence the action is added or not added
         """
         if is_undo == True:                                                         # O(1)
             undo_tracker = UndoTracker()                                            # O(1)

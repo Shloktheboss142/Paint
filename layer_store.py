@@ -1,7 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from layer_util import Layer
-from layer_util import get_layers
+from layer_util import Layer, get_layers
 import layers
 from data_structures.stack_adt import ArrayStack
 from data_structures.array_sorted_list import ArraySortedList, ListItem
@@ -63,6 +62,8 @@ class SetLayerStore(LayerStore):
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when the variables are initialised since there is no other option
         """
         self.active_layer = None                                                                    # O(1)
         self.special_mode_status = False                                                            # O(1)
@@ -84,6 +85,8 @@ class SetLayerStore(LayerStore):
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when the layer being added is the same as the current layer or the layer is changed or the current layer is None
         """
         if self.active_layer != layer or self.active_layer == None:                                 # O(1)
             self.active_layer = layer                                                               # O(1)
@@ -99,9 +102,9 @@ class SetLayerStore(LayerStore):
             Type: Tuple of 3 integers
         - timestamp: Used for layers that change over time (Such as rainbow and sparkle)
             Type: Integer
-        - x: Used for layers that change over time (Such as rainbow and sparkle)
+        - x: A property to display the layer, used for layers such as darken, rainbow, lighten and sparkle
             Type: Integer
-        - y: Used for layers that change over time (Such as rainbow and sparkle)
+        - y: A property to display the layer, used for layers such as darken, rainbow, lighten and sparkle
             Type: Integer
 
         Returns:
@@ -110,7 +113,7 @@ class SetLayerStore(LayerStore):
 
         Complexity:
         - Worst case: O(n), Where n is the timestamp
-            Will only happen if the layer being applied is sparkle.
+            Will only happen if the layer being applied is an animated layer
         - Best case: O(1)
             Will occur when there is no active layer and special is not active. In which case the start color is returned.
         """
@@ -143,6 +146,8 @@ class SetLayerStore(LayerStore):
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when either there is no active layer or the active layer is erased
         """
         if self.active_layer != None:                                                               # O(1)
             self.active_layer = None                                                                # O(1)
@@ -151,7 +156,7 @@ class SetLayerStore(LayerStore):
 
     def special(self) -> None:
         """
-        Activates the special mode for the current grid square
+        Activates the special mode for the current grid square by changing the special mode status to the opposite of what it currently is
 
         Returns:
         - None
@@ -180,14 +185,16 @@ class AdditiveLayerStore(LayerStore):
         - None
 
         Complexity:
-        - Worst case: O(n) Where n is the length of the queue to be initialised
-        - Best case: O(n) Where n is the length of the queue to be initialised            
+        - Worst case: O(n) Where n is the length of the queue to be initialised which is the number of layers * 100
+        - Best case: O(n) Where n is the length of the queue to be initialised which is the number of layers * 100
+
+        Both best and worst happen when the queue is initialised since there is no other option
         """
         self.layer_sequence = CircularQueue(len(get_layers()) * 100)                                # O(n) Where n is the length of the queue
 
     def add(self, layer: Layer) -> bool:
         """
-        Adds a layer to the layers queue
+        Adds a layer to the layer sequence queue
 
         Args:
         - layer: The layer to be added to the queue
@@ -202,6 +209,8 @@ class AdditiveLayerStore(LayerStore):
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when either the layer is added to the queue or the queue is full
         """
         if self.layer_sequence.is_full() == False:                                                  # O(1)
             self.layer_sequence.append(layer)                                                       # O(1)
@@ -218,9 +227,9 @@ class AdditiveLayerStore(LayerStore):
             Type: Tuple of 3 integers
         - timestamp: Used for layers that change over time (Such as rainbow and sparkle)
             Type: Integer
-        - x: Used for layers that change over time (Such as rainbow and sparkle)
+        - x: A property to display the layer, used for layers such as darken, rainbow, lighten and sparkle
             Type: Integer
-        - y: Used for layers that change over time (Such as rainbow and sparkle)
+        - y: A property to display the layer, used for layers such as darken, rainbow, lighten and sparkle
             Type: Integer
 
         Returns:
@@ -228,10 +237,10 @@ class AdditiveLayerStore(LayerStore):
             Type: Tuple of 3 integers
 
         Complexity:
-        - Worst case: O(mn), Where n is the length of the layer sequence, and m is the timestamp of the sparkle layer
-            Will only happen if one of the layers being applied is sparkle.
+        - Worst case: O(mn), Where n is the length of the layer sequence, and m is the timestamp of the layers that are animated
+            Will only happen if one of the layers being applied is sparkle or rainbow.
         - Best case: O(n), Where n is the length of the layer sequence
-            Will only occur when the sparkle layer is not present in the layer sequence
+            Will only occur when the sparkle or rainbow layer is not present in the layer sequence or the layer sequence is empty
         """
         for _ in range(len(self.layer_sequence)):                                                   # O(n) Where n is the length of the layer sequence
             layer_to_apply = self.layer_sequence.serve()                                            # O(1)
@@ -257,6 +266,8 @@ class AdditiveLayerStore(LayerStore):
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when either a layer is removed from the queue or the queue is empty
         """
         if self.layer_sequence.is_empty() == False:                                                 # O(1)
             self.layer_sequence.serve()                                                             # O(1)
@@ -304,6 +315,8 @@ class SequenceLayerStore(LayerStore):
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when the set is initialised since there is no other option
         """
         self.set = BSet()                                                                           # O(1)
 
@@ -324,6 +337,8 @@ class SequenceLayerStore(LayerStore):
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when either the layer is in the set or is to be added to the set
         """
         if layer.index + 1 in self.set:                                                             # O(1)
             return False                                                                            # O(1)
@@ -339,9 +354,9 @@ class SequenceLayerStore(LayerStore):
             Type: Tuple of 3 integers
         - timestamp: Used for layers that change over time (Such as rainbow and sparkle)
             Type: Integer
-        - x: Used for layers that change over time (Such as rainbow and sparkle)
+        - x: A property to display the layer, used for layers such as darken, rainbow, lighten and sparkle
             Type: Integer
-        - y: Used for layers that change over time (Such as rainbow and sparkle)
+        - y: A property to display the layer, used for layers such as darken, rainbow, lighten and sparkle
             Type: Integer
 
         Returns:
@@ -349,10 +364,10 @@ class SequenceLayerStore(LayerStore):
             Type: Tuple of 3 integers
 
         Complexity:
-        - Worst case: O(mn), Where n is the length of the layer sequence, and m is the timestamp of the sparkle layer
-            Will only happen if one of the layers being applied is sparkle.
+        - Worst case: O(mn), Where n is the length of the layer sequence, and m is the timestamp of the layers that are animated
+            Will only happen if one of the layers being applied is sparkle or rainbow.
         - Best case: O(n), Where n is the length of the layer sequence
-            Will only occur when the sparkle layer is not present in the layer sequence
+            Will only occur when the sparkle or ranbow layer is not present in the layer sequence or the set of layers is empty
         """
         for layer in get_layers():                                                                  # O(n) Where n is the number of layers in the program
             if layer != None:                                                                       # O(1)
@@ -378,6 +393,8 @@ class SequenceLayerStore(LayerStore):
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when either the layer is not in the set or is to be removed from the set
         """
         if (layer.index + 1) not in self.set:                                                       # O(1)
             return False                                                                            # O(1)
@@ -386,15 +403,15 @@ class SequenceLayerStore(LayerStore):
 
     def special(self) -> None:
         """
-        Arranges the enabled layers lexigraphically and disables the middle layer
+        Arranges the enabled layers lexigraphically and disables the middle-most layer
 
         Returns:
         - None
 
         Complexity:
-        - Worst case: O(n log m), Where n is number of layers in the program and m is the number of layers in the sorted list array
+        - Worst case: O(n log m), Where n is number of layers in the program and m is the number of layers in the temporary sorted list array
             Happens when at least one layer is enabled
-        - Best case: O(n), Where n is the length of the sorted list array
+        - Best case: O(n), Where n is the length of the temporary sorted list array
             Happens when there are no layers enabled
         """
         temp_list = ArraySortedList(len(get_layers()))                                              # O(n) Where n is the number of layers

@@ -17,6 +17,8 @@ class UndoTracker:
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1), Since the length of the ArrayStack to be initialised is constant
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when the stacks are initialised since there is no other option
         """
         self.action_sequence = ArrayStack(10000)                                # O(1)
         self.undo_sequence = ArrayStack(10000)                                  # O(1)
@@ -37,6 +39,8 @@ class UndoTracker:
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when either the stack is full or not full and hence the action is added or not added
         """
         if self.action_sequence.is_full() == False:                             # O(1)
             self.action_sequence.push(action)                                   # O(1)
@@ -58,7 +62,7 @@ class UndoTracker:
             - Type: PaintAction
 
         Complexity:
-        - Worst case: O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action
+        - Worst case: O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action sequence
             Will only occur if the stack is not empty and the layer is SequenceLayerStore, since the complexity of the undo_apply method is O(mno log p) for the SequenceLayerStore
         - Best case: O(1)
             Will only occur if the stack is empty
@@ -88,7 +92,7 @@ class UndoTracker:
             - Type: PaintAction
 
         Complexity:
-        - Worst case: O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action
+        - Worst case: O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action sequence
             Will only occur if the stack is not empty and the layer is SequenceLayerStore, since the complexity of the undo_apply method is O(mno log p) for the SequenceLayerStore
         - Best case: O(1)
             Will only occur if the stack is empty
