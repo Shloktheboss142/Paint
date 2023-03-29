@@ -301,6 +301,8 @@ class MyWindow(arcade.Window):
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when the objects are initialised since there is no other option
         """
         self.undo_tracker = UndoTracker()                               # O(1)
         self.replay_tracker = ReplayTracker()                           # O(1)
@@ -317,6 +319,8 @@ class MyWindow(arcade.Window):
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when the objects are initialised since there is no other option
         """
         self.on_init()                                                  # O(1)
 
@@ -338,6 +342,8 @@ class MyWindow(arcade.Window):
         Complexity:
         - Worst case: O(n^2), where n is the size of the brush
         - Best case: O(n^2), where n is the size of the brush
+
+        Both best and worst happen when the paint method is called since there is no other option
         """
         paint_action = self.grid.paint(layer, px, py)                   # O(n^2), where n is the size of the brush
         self.undo_tracker.add_action(paint_action)                      # O(1)
@@ -351,12 +357,12 @@ class MyWindow(arcade.Window):
         - None
 
         Complexity:
-        - Worst case: O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action
+        - Worst case: O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action sequence
             Will only occur if the stack is not empty and the layer is SequenceLayerStore, since the complexity of the undo_apply method is O(mno log p) for the SequenceLayerStore
         - Best case: O(1)
             Will only occur if the stack is empty
         """
-        action_to_undo = self.undo_tracker.undo(self.grid)              # O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action
+        action_to_undo = self.undo_tracker.undo(self.grid)              # O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action sequence
         self.replay_tracker.add_action(action_to_undo, True)            # O(1)
 
     def on_redo(self) -> None:
@@ -367,16 +373,15 @@ class MyWindow(arcade.Window):
         - None
 
         Complexity:
-        - Worst case: O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action
+        - Worst case: O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action sequence
             Will only occur if the stack is not empty and the layer is SequenceLayerStore, since the complexity of the undo_apply method is O(mno log p) for the SequenceLayerStore
         - Best case: O(1)
             Will only occur if the stack is empty
         """
-        action_to_redo = self.undo_tracker.redo(self.grid)              # O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action
+        action_to_redo = self.undo_tracker.redo(self.grid)              # O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action sequence
         self.replay_tracker.add_action(action_to_redo)                  # O(1)
 
     def on_special(self) -> None:
-        """Called when the special action is requested."""
         """
         Called when the special action is requested.
 
@@ -417,7 +422,7 @@ class MyWindow(arcade.Window):
         - Best case: O(1)
             Will only occur if the queue is empty
         """
-        return self.replay_tracker.play_next_action(self.grid)
+        return self.replay_tracker.play_next_action(self.grid)          # O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action sequence
 
     def on_increase_brush_size(self) -> None:
         """
@@ -431,6 +436,8 @@ class MyWindow(arcade.Window):
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when the increase_brush_size method is called since there is no other option
         """
         self.grid.increase_brush_size()                                 # O(1)
 
@@ -446,6 +453,8 @@ class MyWindow(arcade.Window):
             Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
+
+        Both best and worst happen when the decrease_brush_size method is called since there is no other option
         """
         self.grid.decrease_brush_size()                                 # O(1)
 
