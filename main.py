@@ -289,62 +289,165 @@ class MyWindow(arcade.Window):
 
     # STUDENT PART
 
-    def on_init(self):
-        """Initialisation that occurs after the system initialisation."""
-        self.undo_tracker = UndoTracker()
-        self.replay_tracker = ReplayTracker()
+    def on_init(self) -> None:
+        """
+        Initialisation that occurs after the system initialisation.
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        """
+        self.undo_tracker = UndoTracker()                               # O(1)
+        self.replay_tracker = ReplayTracker()                           # O(1)
 
     def on_reset(self):
-        """Called when a window reset is requested."""
-        self.on_init()
+        """
+        Called when a window reset is requested.
 
-    def on_paint(self, layer: Layer, px, py):
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        """
+        self.on_init()                                                  # O(1)
+
+    def on_paint(self, layer: Layer, px: int, py: int) -> None:
         """
         Called when a grid square is clicked on, which should trigger painting in the vicinity.
-        Vicinity squares outside of the range [0, GRID_SIZE_X) or [0, GRID_SIZE_Y) can be safely ignored.
 
-        layer: The layer being applied.
-        px: x position of the brush.
-        py: y position of the brush.
+        Args:
+        - layer: The layer to paint on.
+            Type: Layer
+        - px: The x position of the square to paint.
+            Type: int
+        - py: The y position of the square to paint.
+            Type: int
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case: O(n^2), where n is the size of the brush
+        - Best case: O(n^2), where n is the size of the brush
         """
-        paint_action = self.grid.paint(layer, px, py)
-        self.undo_tracker.add_action(paint_action)
-        self.replay_tracker.add_action(paint_action)
+        paint_action = self.grid.paint(layer, px, py)                   # O(n^2), where n is the size of the brush
+        self.undo_tracker.add_action(paint_action)                      # O(1)
+        self.replay_tracker.add_action(paint_action)                    # O(1)
 
-    def on_undo(self):
-        """Called when an undo is requested."""
-        action_to_undo = self.undo_tracker.undo(self.grid)
-        self.replay_tracker.add_action(action_to_undo, True)
+    def on_undo(self) -> None:
+        """
+        Called when an undo is requested.
 
-    def on_redo(self):
-        """Called when a redo is requested."""
-        action_to_redo = self.undo_tracker.redo(self.grid)
-        self.replay_tracker.add_action(action_to_redo)
+        Returns:
+        - None
 
-    def on_special(self):
+        Complexity:
+        - Worst case: O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action
+            Will only occur if the stack is not empty and the layer is SequenceLayerStore, since the complexity of the undo_apply method is O(mno log p) for the SequenceLayerStore
+        - Best case: O(1)
+            Will only occur if the stack is empty
+        """
+        action_to_undo = self.undo_tracker.undo(self.grid)              # O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action
+        self.replay_tracker.add_action(action_to_undo, True)            # O(1)
+
+    def on_redo(self) -> None:
+        """
+        Called when a redo is requested.
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case: O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action
+            Will only occur if the stack is not empty and the layer is SequenceLayerStore, since the complexity of the undo_apply method is O(mno log p) for the SequenceLayerStore
+        - Best case: O(1)
+            Will only occur if the stack is empty
+        """
+        action_to_redo = self.undo_tracker.redo(self.grid)              # O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action
+        self.replay_tracker.add_action(action_to_redo)                  # O(1)
+
+    def on_special(self) -> None:
         """Called when the special action is requested."""
-        special = self.grid.special()
-        self.undo_tracker.add_action(special)
-        self.replay_tracker.add_action(special)
+        """
+        Called when the special action is requested.
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case: O(mno log p), Where m is the number of rows, n is the number of columns, o is the number of layers in the program and p is the number of layers in the sorted list array
+            Will only occur when the layer store being used is the SequenceLayerStore and there is at least one layer in the set
+        - Best case: O(mn), Where m is the number of rows and n is the number of columns
+            Will only occur when the layer store being used is the SetLayerStore
+        """
+        special = self.grid.special()                                   # O(mno log p), Where m is the number of rows, n is the number of columns, o is the number of layers in the program and p is the number of layers in the sorted list array
+        self.undo_tracker.add_action(special)                           # O(1)
+        self.replay_tracker.add_action(special)                         # O(1)
 
     def on_replay_start(self):
-        """Called when the replay starting is requested."""
+        """
+        Called when the replay starting is requested
+
+        Returns:
+        - None
+
+        NOT USED
+        """
         self.replay_tracker.start_replay()
 
     def on_replay_next_step(self) -> bool:
         """
         Called when the next step of the replay is requested.
-        Returns whether the replay is finished.
+
+        Returns:
+        - Boolean which is True if the replay is finished, False otherwise
+
+        Complexity:
+        - Worst case: O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action
+            Will only occur if the stack is not empty and the layer is SequenceLayerStore, since the complexity of the undo_apply method is O(mno log p) for the SequenceLayerStore
+        - Best case: O(1)
+            Will only occur if the queue is empty
         """
         return self.replay_tracker.play_next_action(self.grid)
 
-    def on_increase_brush_size(self):
-        """Called when an increase to the brush size is requested."""
-        self.grid.increase_brush_size()
+    def on_increase_brush_size(self) -> None:
+        """
+        Called when an increase to the brush size is requested.
 
-    def on_decrease_brush_size(self):
-        """Called when a decrease to the brush size is requested."""
-        self.grid.decrease_brush_size()
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        """
+        self.grid.increase_brush_size()                                 # O(1)
+
+    def on_decrease_brush_size(self) -> None:
+        """
+        Called when an decrease to the brush size is requested.
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        """
+        self.grid.decrease_brush_size()                                 # O(1)
 
 def main():
     """ Main function """

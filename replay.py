@@ -7,48 +7,82 @@ from undo import UndoTracker
 class ReplayTracker:
 
     def __init__(self):
-        self.replay_sequence = CircularQueue(10000)
+        """
+        Initlaises a queue to store the replay sequence.
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case: O(1), Since the length of the CircularQueue to be initialised is constant
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1), Since the length of the CircularQueue to be initialised is constant
+            Number of operations is constant and doesnt rely on the size of the input
+        """
+        self.replay_sequence = CircularQueue(10000)                                 # O(1), Since the length of the CircularQueue to be initialised is constant
 
     def start_replay(self) -> None:
-        """
-        Called whenever we should stop taking actions, and start playing them back.
 
-        Useful if you have any setup to do before `play_next_action` should be called.
-        """
+        """-------------NOT USED-------------"""
+
         pass
 
-    def add_action(self, action: PaintAction, is_undo: bool=False) -> None:
+    def add_action(self, action: PaintAction, is_undo: bool = False) -> None:
         """
-        Adds an action to the replay.
+        Adds an action to the replay. If the action is an undo action, it will be added to the undo sequence.
 
-        `is_undo` specifies whether the action was an undo action or not.
-        Special, Redo, and Draw all have this is False.
+        Args:
+        - action: A PaintAction object to be added to the replay
+            - Type: PaintAction
+        - is_undo: A boolean that specifies whether the action is an undo action or not
+            - Type: bool
+
+        Returns:
+        - None
+
+        Complexity:
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
         """
-        if is_undo == True:
-            undo_tracker = UndoTracker()
-            undo_tracker.add_action(action)
-            self.replay_sequence.append(undo_tracker)
-        else:
-            self.replay_sequence.append(action)
+        if is_undo == True:                                                         # O(1)
+            undo_tracker = UndoTracker()                                            # O(1)
+            undo_tracker.add_action(action)                                         # O(1)
+            self.replay_sequence.append(undo_tracker)                               # O(1)
+        else:                                                                       # O(1)
+            self.replay_sequence.append(action)                                     # O(1)
 
     def play_next_action(self, grid: Grid) -> bool:
         """
-        Plays the next replay action on the grid.
-        Returns a boolean.
-            - If there were no more actions to play, and so nothing happened, return True.
-            - Otherwise, return False.
+        Plays the next replay action in the queue on the grid.
+
+        Args:
+        - grid: The grid object to be modified
+            - Type: Grid
+
+        Returns:
+        - Boolean value that specifies whether there were no more actions to play or not
+            A return value of True means that there were no more actions to play
+            - Type: bool
+
+        Complexity:
+        - Worst case: O(mno log p), Where m is the length of the grid, n is the width of the grid, o is the number of layers in the grid and p is the number of steps in the action
+            Will only occur if the stack is not empty and the layer is SequenceLayerStore, since the complexity of the undo_apply method is O(mno log p) for the SequenceLayerStore
+        - Best case: O(1)
+            Will only occur if the queue is empty
         """
-        if self.replay_sequence.is_empty() == False:
-            replay_action = self.replay_sequence.serve()
-            if isinstance(replay_action, UndoTracker) == True:
-                replay_action.action_sequence.pop().undo_apply(grid)
-                return False
-            else:
-                if isinstance(replay_action, PaintAction) == True:
-                    replay_action.redo_apply(grid)
-                    return False
-        else:
-            return True
+        if self.replay_sequence.is_empty() == False:                                # O(1)
+            replay_action = self.replay_sequence.serve()                            # O(1)
+            if isinstance(replay_action, UndoTracker) == True:                      # O(1)
+                replay_action.action_sequence.pop().undo_apply(grid)                # O(mno log p)
+                return False                                                        # O(1)
+            else:                                                                   # O(1)
+                if isinstance(replay_action, PaintAction) == True:                  # O(1)
+                    replay_action.redo_apply(grid)                                  # O(mno log p)
+                    return False                                                    # O(1)
+        else:                                                                       # O(1)
+            return True                                                             # O(1)
 
 if __name__ == "__main__":
     action1 = PaintAction([], is_special=True)

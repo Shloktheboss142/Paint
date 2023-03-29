@@ -6,6 +6,7 @@ import layers
 from data_structures.stack_adt import ArrayStack
 from data_structures.array_sorted_list import ArraySortedList, ListItem
 from data_structures.queue_adt import CircularQueue
+from data_structures.bset import BSet
 
 class LayerStore(ABC):
 
@@ -49,7 +50,7 @@ class SetLayerStore(LayerStore):
     - erase: Remove the single layer. Ignore what is currently selected.
     - special: Invert the colour output.
     """
-    
+
     def __init__(self) -> None:
         """
         Initlaises active layer to None and special mode status to False
@@ -58,7 +59,9 @@ class SetLayerStore(LayerStore):
         - None
 
         Complexity:
-        - Worst case and Best case is O(1):
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
         """
         self.active_layer = None                                                                    # O(1)
@@ -66,16 +69,20 @@ class SetLayerStore(LayerStore):
 
     def add(self, layer: Layer) -> bool:
         """
-        Add a layer to the store.
+        Adds a layer to the grid square
 
         Args:
         - layer: The layer to add to the grid square
+            Type: Layer Oblject
 
         Returns:
-        - Boolean value of True is the layer was added to the grid square, False if the layer was not added to the grid square
+        - Boolean value of True if the layer was added to the grid square, False if the current layer is unchanged
+            Type: Boolean
 
         Complexity:
-        - Worst case and Best case is O(1):
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
         """
         if self.active_layer != layer or self.active_layer == None:                                 # O(1)
@@ -83,24 +90,29 @@ class SetLayerStore(LayerStore):
             return True                                                                             # O(1)
         return False                                                                                # O(1)
     
-    def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
+    def get_color(self, start: tuple[int, int, int], timestamp: int, x: int, y: int) -> tuple[int, int, int]:
         """
         Calculating the color that the grid square should display
 
         Args:
         - start: The color that is currently on the grid square
+            Type: Tuple of 3 integers
         - timestamp: Used for layers that change over time (Such as rainbow and sparkle)
+            Type: Integer
         - x: Used for layers that change over time (Such as rainbow and sparkle)
+            Type: Integer
         - y: Used for layers that change over time (Such as rainbow and sparkle)
+            Type: Integer
 
         Returns:
         - A tuple containing the RGB value that the layer square should display
+            Type: Tuple of 3 integers
 
         Complexity:
         - Worst case: O(n), Where n is the timestamp
-            Will only happen if the layer being applied is sparkle
+            Will only happen if the layer being applied is sparkle.
         - Best case: O(1)
-            Will occur when there is no active layer and special is not active
+            Will occur when there is no active layer and special is not active. In which case the start color is returned.
         """
         if self.active_layer == None and self.special_mode_status == False:                         # O(1)
             return start                                                                            # O(1)
@@ -115,16 +127,21 @@ class SetLayerStore(LayerStore):
 
     def erase(self, layer: Layer) -> bool:
         """
-        Erases the layer that is currently in the grid square
+        Erases the layer that is currently in the grid square and sets the active layer to None
 
         Args:
         - layer: The layer to be removed from the grid square
+            Type: Layer Object
+            (Not used in this function)
 
         Returns:
-        - Boolean value of True is the layer was eaased from the grid square, False if there is no layer in the grid square
+        - Boolean value of True is the layer was eaased from the grid square, False if there was no active layer in the grid square
+            Type: Boolean
 
         Complexity:
-        - Worst case and Best case is O(1):
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
         """
         if self.active_layer != None:                                                               # O(1)
@@ -134,16 +151,18 @@ class SetLayerStore(LayerStore):
 
     def special(self) -> None:
         """
-        Activates the special mode for the grid square
+        Activates the special mode for the current grid square
 
         Returns:
         - None
 
         Complexity:
-        - Worst case and Best case is O(1):
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
         """
-        self.special_mode_status = not self.special_mode_status                 # O(1)
+        self.special_mode_status = not self.special_mode_status                                     # O(1)
 
 class AdditiveLayerStore(LayerStore):
     """
@@ -161,8 +180,8 @@ class AdditiveLayerStore(LayerStore):
         - None
 
         Complexity:
-        - Worst case and Best case is O(n):
-            Where n is the length of the queue
+        - Worst case: O(n) Where n is the length of the queue to be initialised
+        - Best case: O(n) Where n is the length of the queue to be initialised            
         """
         self.layer_sequence = CircularQueue(len(get_layers()) * 100)                                # O(n) Where n is the length of the queue
 
@@ -172,13 +191,17 @@ class AdditiveLayerStore(LayerStore):
 
         Args:
         - layer: The layer to be added to the queue
+            Type: Layer Object
 
         Returns:
         - Boolean value of True is the layer was added to the queue, False if the layer was not added to the queue due to the queue being full
+            Type: Boolean
 
         Complexity:
-        - Worst case and Best case is O(1):
-            Where n is the length of the queue
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
         """
         if self.layer_sequence.is_full() == False:                                                  # O(1)
             self.layer_sequence.append(layer)                                                       # O(1)
@@ -186,22 +209,29 @@ class AdditiveLayerStore(LayerStore):
         else:                                                                                       # O(1)
             return False                                                                            # O(1)
         
-    def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
+    def get_color(self, start: tuple[int, int, int], timestamp: int, x: int, y: int) -> tuple[int, int, int]:
         """
         Returns the colour this square should show, given the current layers.
 
         Args:
         - start: The color that is currently on the grid square
+            Type: Tuple of 3 integers
         - timestamp: Used for layers that change over time (Such as rainbow and sparkle)
+            Type: Integer
         - x: Used for layers that change over time (Such as rainbow and sparkle)
+            Type: Integer
         - y: Used for layers that change over time (Such as rainbow and sparkle)
+            Type: Integer
 
         Returns:
         - A tuple containing the RGB value that the layer square should display
+            Type: Tuple of 3 integers
 
         Complexity:
-        - Worst case and Best case: O(nm), Where n is the length of the layer sequence, and n is the timestamp
-            Since the 
+        - Worst case: O(mn), Where n is the length of the layer sequence, and m is the timestamp of the sparkle layer
+            Will only happen if one of the layers being applied is sparkle.
+        - Best case: O(n), Where n is the length of the layer sequence
+            Will only occur when the sparkle layer is not present in the layer sequence
         """
         for _ in range(len(self.layer_sequence)):                                                   # O(n) Where n is the length of the layer sequence
             layer_to_apply = self.layer_sequence.serve()                                            # O(1)
@@ -216,15 +246,18 @@ class AdditiveLayerStore(LayerStore):
 
         Args:
         - layer: The layer to be removed from the grid square
+            Type: Layer Object
 
         Returns:
-        - Boolean value of True is the layer was eaased from the grid square, False if there is no layer in the grid square
+        - Boolean value of True is the layer was eaased from the grid square, False if there are no layers in the grid square
+            Type: Boolean
 
         Complexity:
-        - Worst case and Best case is O(1):
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1)
             Number of operations is constant and doesnt rely on the size of the input
         """
-
         if self.layer_sequence.is_empty() == False:                                                 # O(1)
             self.layer_sequence.serve()                                                             # O(1)
             return True                                                                             # O(1)
@@ -232,10 +265,7 @@ class AdditiveLayerStore(LayerStore):
 
     def special(self) -> None:
         """
-        Special mode. Different for each store implementation.
-        """
-        """
-        Reverses the order of layers in the layer sequence queue
+        Reverses the order of layers in the layer sequence queue so that the layer are applied backwards
 
         Returns:
         - None
@@ -264,73 +294,71 @@ class SequenceLayerStore(LayerStore):
 
     def __init__(self) -> None:
         """
-        Initialises a sorted list to store the layers added
+        Initialises a set to store the layers added
 
         Returns:
         - None
 
         Complexity:
-        - Worst case: O(log n), Where n is the 
-            where log(n) occurs when a layer is added into the array sorted list, 
-            and the position of the index is to be found using the function _index_to_add, which iterates 
-            logarithmically, because it involves halving the number of elements in an array
-        - Best case: O(1), which occurs when the value of the layer is already True, which means it is 
-            already "applying", in this case, nothing is changed and False is returned immediately
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
+        - Best case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
         """
-        valid_layer_count = 0                                                                       # O(1)
-
-        for number_of_layers in get_layers():                                                       # O(n) Where n is the number of layers in the program
-            if number_of_layers != None:                                                            # O(1)
-                valid_layer_count += 1                                                              # O(1)
-
-        self.layer_list = ArraySortedList(valid_layer_count)                                        # O(m) Where n is the number of layers in the program
-        
-        for layer in get_layers():                                                                  # O(n) Where n is the number of layers in the program
-            if layer != None:                                                                       # O(1)
-                self.layer_list.add(ListItem(False, layer.index))                                   # O(log n) Where n is the length of the sorted list
+        self.set = BSet()                                                                           # O(1)
 
     def add(self, layer: Layer) -> bool:
         """
         Enables the given layer
 
         Args:
-        - layer: The layer to be enabled
+        - layer: The layer to be added to the queue
+            Type: Layer Object
 
         Returns:
-        - Boolean value of True is the layer was enables, False if the layer already enabled
+        - Boolean value of True is the layer was added to the queue, False if the layer was not added to the queue due to the queue being full
+            Type: Boolean
 
         Complexity:
-        - Worst case: O(n), Where n is the length of the sorted list array
-            Happens when the layer trying to be added is not yet enabled
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
-            Happens when the layer trying to be added is already enabled
+            Number of operations is constant and doesnt rely on the size of the input
         """
-        if self.layer_list[layer.index].value == False:                                             # O(1)
-            self.layer_list.delete_at_index(layer.index)                                            # O(n)
-            self.layer_list.add(ListItem(True, layer.index))                                        # O(log n)
-            return True                                                                             # O(1)
-        return False                                                                                # O(1)
+        if layer.index + 1 in self.set:                                                             # O(1)
+            return False                                                                            # O(1)
+        self.set.add(layer.index + 1)                                                               # O(1)
+        return True                                                                                 # O(1)
     
-    def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
+    def get_color(self, start: tuple[int, int, int], timestamp: int, x: int, y: int) -> tuple[int, int, int]:
         """
-        Returns the colour this square should show, given the current enabled layers.
+        Returns the colour this square should show, given the current layers.
 
         Args:
         - start: The color that is currently on the grid square
+            Type: Tuple of 3 integers
         - timestamp: Used for layers that change over time (Such as rainbow and sparkle)
+            Type: Integer
         - x: Used for layers that change over time (Such as rainbow and sparkle)
+            Type: Integer
         - y: Used for layers that change over time (Such as rainbow and sparkle)
+            Type: Integer
 
         Returns:
         - A tuple containing the RGB value that the layer square should display
+            Type: Tuple of 3 integers
 
         Complexity:
-        - Worst case and Best case: O(nm), Where n is the length of the layer sequence, and n is the timestamp
-            Since the 
+        - Worst case: O(mn), Where n is the length of the layer sequence, and m is the timestamp of the sparkle layer
+            Will only happen if one of the layers being applied is sparkle.
+        - Best case: O(n), Where n is the length of the layer sequence
+            Will only occur when the sparkle layer is not present in the layer sequence
         """
-        for index in range(len(self.layer_list)):                                                   # O(n) Where n is the length of the sorted list array
-            if self.layer_list[index].value == True:                                                # O(1)
-                start = get_layers()[self.layer_list[index].key].apply(start, timestamp, x, y)      # O(1) / O(m) Where m is the timestamp for the sparkle layer
+        for layer in get_layers():                                                                  # O(n) Where n is the number of layers in the program
+            if layer != None:                                                                       # O(1)
+                if (layer.index + 1) in self.set:                                                   # O(1)
+                    start = layer.apply(start, timestamp, x, y)                                     # Best case: O(1) Worst case: O(m) Where m is the timestamp for the sparkle layer
+
         return start                                                                                # O(1)
 
     def erase(self, layer: Layer) -> bool:
@@ -338,22 +366,23 @@ class SequenceLayerStore(LayerStore):
         Disables the given layer
 
         Args:
-        - layer: The layer to be disabled
+        - layer: The layer to be removed from the grid square
+            Type: Layer Object
 
         Returns:
-        - Boolean value of True is the layer was enables, False if the layer already enabled
+        - Boolean value of True is the layer was eaased from the grid square, False if there are no layers in the grid square
+            Type: Boolean
 
         Complexity:
-        - Worst case: O(n), Where n is the length of the sorted list array
-            Happens when the layer trying to be diabled is hasn't been disabled yet
+        - Worst case: O(1)
+            Number of operations is constant and doesnt rely on the size of the input
         - Best case: O(1)
-            Happens when the layer trying to be disabled is already disabled
+            Number of operations is constant and doesnt rely on the size of the input
         """
-        if self.layer_list[layer.index].value == True:                                              # O(1)
-            self.layer_list.delete_at_index(layer.index)                                            # O(n)
-            self.layer_list.add(ListItem(False, layer.index))                                       # O(log n)
-            return True                                                                             # O(1)
-        return False                                                                                # O(1)
+        if (layer.index + 1) not in self.set:                                                       # O(1)
+            return False                                                                            # O(1)
+        self.set.remove(layer.index + 1)                                                            # O(1)
+        return True                                                                                 # O(1)
 
     def special(self) -> None:
         """
@@ -363,26 +392,25 @@ class SequenceLayerStore(LayerStore):
         - None
 
         Complexity:
-        - Worst case: O(n), Where n is the length of the sorted list array
-            Happens when the layer trying to be diabled is hasn't been disabled yet
-        - Best case: O(1)
-            Happens when the layer trying to be disabled is already disabled
+        - Worst case: O(n log m), Where n is number of layers in the program and m is the number of layers in the sorted list array
+            Happens when at least one layer is enabled
+        - Best case: O(n), Where n is the length of the sorted list array
+            Happens when there are no layers enabled
         """
-        temp_list = ArraySortedList(len(self.layer_list))                                           # O(n) Where n is the number of layers
+        temp_list = ArraySortedList(len(get_layers()))                                              # O(n) Where n is the number of layers
 
-        for index in range(len(self.layer_list)):                                                   # O(n) Where n is the length of the layer list
-            if self.layer_list[index].value == True:                                                # O(1)
-                item_key = get_layers()[self.layer_list[index].key]                                 # O(1)
-                item_name = get_layers()[self.layer_list[index].key].name                           # O(1)
-                temp_list.add(ListItem(item_key, item_name))                                        # O(log m) Where m is the length of the temp list
+        for layer in get_layers():                                                                  # O(n) Where n is the number of layers in the program
+            if layer != None:                                                                       # O(1)
+                if (layer.index + 1) in self.set:                                                   # O(1)
+                    temp_list.add(ListItem(layer, layer.name))                                      # O(log m) Where n is the length of the sorted list array
 
         if temp_list.is_empty() == True:                                                            # O(1)
             return None                                                                             # O(1)
         elif len(temp_list) == 1:                                                                   # O(1)
-            self.erase(temp_list[0].value)                                                          # O(n), Where n is the number of layers
+            self.erase(temp_list[0].value)                                                          # O(1)
             return None                                                                             # O(1)
-
+        
         if len(temp_list) % 2 == 0:                                                                 # O(1)
-            temp_list.delete_at_index(len(temp_list) - 1)                                           # O(n)
+            temp_list.delete_at_index(len(temp_list) - 1)                                           # O(m) Where n is the length of the sorted list array
 
-        self.erase(temp_list[len(temp_list) // 2].value)                                            # O(n)
+        self.erase(temp_list[len(temp_list) // 2].value)                                            # O(1)
